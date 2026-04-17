@@ -82,6 +82,7 @@ export default function Reports() {
       const month = d.getMonth() + 1
       return `${year}-M${month}`
     }
+    return copy.date // Retorno por defecto
   }
 
   const formatPeriod = (key: string, items?: Copy[]) => {
