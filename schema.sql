@@ -20,5 +20,7 @@ CREATE TABLE copies (
   copy_type_id UUID REFERENCES copy_types(id),
   date DATE NOT NULL,
   quantity INTEGER NOT NULL,
+  paid BOOLEAN DEFAULT FALSE,
+  paid_date TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW()
 );
