@@ -1,12 +1,20 @@
 'use client'
 
-import { useState } from 'react'
-import CopiesSection from './components/CopiesSection'
-import TeachersSection from './components/TeachersSection'
-import CopyTypesSection from './components/CopyTypesSection'
-import ReportsSection from './components/ReportsSection'
+import { useState, Suspense } from 'react'
+import dynamic from 'next/dynamic'
+
+const CopiesSection = dynamic(() => import('./components/CopiesSection'), { ssr: false })
+const TeachersSection = dynamic(() => import('./components/TeachersSection'), { ssr: false })
+const CopyTypesSection = dynamic(() => import('./components/CopyTypesSection'), { ssr: false })
+const ReportsSection = dynamic(() => import('./components/ReportsSection'), { ssr: false })
 
 type Section = 'home' | 'copies' | 'teachers' | 'copy-types' | 'reports'
+
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center p-8">
+    <p className="text-gray-600">Cargando...</p>
+  </div>
+)
 
 export default function Home() {
   const [currentSection, setCurrentSection] = useState<Section>('home')
@@ -14,13 +22,13 @@ export default function Home() {
   const renderSection = () => {
     switch (currentSection) {
       case 'copies':
-        return <CopiesSection />
+        return <Suspense fallback={<LoadingSpinner />}><CopiesSection /></Suspense>
       case 'teachers':
-        return <TeachersSection />
+        return <Suspense fallback={<LoadingSpinner />}><TeachersSection /></Suspense>
       case 'copy-types':
-        return <CopyTypesSection />
+        return <Suspense fallback={<LoadingSpinner />}><CopyTypesSection /></Suspense>
       case 'reports':
-        return <ReportsSection />
+        return <Suspense fallback={<LoadingSpinner />}><ReportsSection /></Suspense>
       default:
         return (
           <div className="text-center">
