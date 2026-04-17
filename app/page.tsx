@@ -1,67 +1,87 @@
+'use client'
+
+import { useState } from 'react'
+import CopiesSection from './components/CopiesSection'
+import TeachersSection from './components/TeachersSection'
+import CopyTypesSection from './components/CopyTypesSection'
+import ReportsSection from './components/ReportsSection'
+
+type Section = 'home' | 'copies' | 'teachers' | 'copy-types' | 'reports'
+
 export default function Home() {
+  const [currentSection, setCurrentSection] = useState<Section>('home')
+
+  const renderSection = () => {
+    switch (currentSection) {
+      case 'copies':
+        return <CopiesSection />
+      case 'teachers':
+        return <TeachersSection />
+      case 'copy-types':
+        return <CopyTypesSection />
+      case 'reports':
+        return <ReportsSection />
+      default:
+        return (
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-8 text-blue-600">Gestión de Copias</h1>
+            <p className="text-gray-600 mb-8 text-lg">Selecciona una opción del menú</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              <button
+                onClick={() => setCurrentSection('copies')}
+                className="bg-blue-500 hover:bg-blue-600 text-white p-6 rounded-lg font-semibold transition"
+              >
+                📋 Registrar Copias
+              </button>
+              <button
+                onClick={() => setCurrentSection('teachers')}
+                className="bg-green-500 hover:bg-green-600 text-white p-6 rounded-lg font-semibold transition"
+              >
+                👨‍🏫 Profesores
+              </button>
+              <button
+                onClick={() => setCurrentSection('copy-types')}
+                className="bg-purple-500 hover:bg-purple-600 text-white p-6 rounded-lg font-semibold transition"
+              >
+                📄 Tipos de Copia
+              </button>
+              <button
+                onClick={() => setCurrentSection('reports')}
+                className="bg-orange-500 hover:bg-orange-600 text-white p-6 rounded-lg font-semibold transition"
+              >
+                📊 Reportes
+              </button>
+            </div>
+          </div>
+        )
+    }
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <h1 className="text-4xl font-bold">Sistema de Reporte de Copias</h1>
-      </div>
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="/teachers"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Profesores{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Registrar y gestionar profesores.
-          </p>
-        </a>
-        <a
-          href="/copy-types"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Tipos de Copia{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Registrar tipos y precios de copias.
-          </p>
-        </a>
-        <a
-          href="/copies"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Registrar Copias{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Registrar copias realizadas por día.
-          </p>
-        </a>
-        <a
-          href="/reports"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Reportes{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Ver reportes diarios, semanales y mensuales.
-          </p>
-        </a>
-      </div>
-    </main>
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-gray-800 text-white shadow-lg">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">Copias Librería</h1>
+            {currentSection !== 'home' && (
+              <button
+                onClick={() => setCurrentSection('home')}
+                className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded transition"
+              >
+                ← Volver al menú
+              </button>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      <main className="container mx-auto px-4 py-8">
+        {renderSection()}
+      </main>
+
+      <footer className="bg-gray-200 text-center py-4 mt-8">
+        <p className="text-gray-600">© 2024 Gestión de Copias Librería</p>
+      </footer>
+    </div>
   )
 }
