@@ -106,23 +106,7 @@ export default function ReportsSection() {
     data.forEach(item => {
       let k = key(item)
       
-      // Corrección específica para fechas problemáticas de marzo 2026
-      const d = new Date(item.date)
-      const dayOfMonth = d.getDate()
-      const month = d.getMonth()
-      const year = d.getFullYear()
-      
-      // Forzar corrección directa para fechas problemáticas
-      if (year === 2026 && month === 2) {
-        if (dayOfMonth >= 16 && dayOfMonth <= 20) {
-          k = 'W11' // Forzar Semana 11 para 16-20 de marzo
-        } else if (dayOfMonth >= 23 && dayOfMonth <= 27) {
-          k = 'W12' // Forzar Semana 12 para 23-27 de marzo
-        } else if (dayOfMonth >= 30 || dayOfMonth <= 3) {
-          k = 'W13' // Forzar Semana 13 para 30-3 de marzo
-        }
-      }
-      
+            
       if (!grouped[k]) grouped[k] = []
       grouped[k].push(item)
     })
@@ -136,7 +120,9 @@ export default function ReportsSection() {
     const firstDate = dates[0]
     const lastDate = dates[dates.length - 1]
     
-    const formatDate = (date: Date) => date.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })
+    }
     return `${formatDate(firstDate)} - ${formatDate(lastDate)}`
   }
 
@@ -145,7 +131,10 @@ export default function ReportsSection() {
     if (reportType === 'daily') return copy.date
     if (reportType === 'weekly') {
       const year = d.getFullYear()
-      const week = Math.ceil((d.getDate() - d.getDay() + 1) / 7)
+      // Usar un cálculo de semana más robusto basado en ISO 8601
+      const firstDayOfYear = new Date(year, 0, 1)
+      const daysSinceFirstDay = Math.floor((d.getTime() - firstDayOfYear.getTime()) / (24 * 60 * 60 * 1000))
+      const week = Math.ceil((daysSinceFirstDay + firstDayOfYear.getDay() + 1) / 7)
       return `${year}-W${week}`
     }
     if (reportType === 'monthly') {
@@ -189,6 +178,7 @@ const displayCopies = editMode
     ? filteredCopies 
     : filteredCopies.filter(copy => !copy.paid)
 
+  
   const grouped = groupBy(displayCopies, getKey)
 
   return (
@@ -262,6 +252,7 @@ const displayCopies = editMode
                         <th className="border p-2 text-right">Cantidad</th>
                         <th className="border p-2 text-right">Precio Unit.</th>
                         <th className="border p-2 text-right">Subtotal</th>
+                        {editMode && <th className="border p-2 text-left">Acciones</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -274,6 +265,21 @@ const displayCopies = editMode
                             <td className="border p-2 text-right">{copy.quantity}</td>
                             <td className="border p-2 text-right">S/ {copy.copy_types.price.toFixed(2)}</td>
                             <td className="border p-2 text-right font-semibold">S/ {(copy.quantity * copy.copy_types.price).toFixed(2)}</td>
+                            {editMode && (
+                              <td className="border p-2">
+                                {!copy.paid ? (
+                                  <button
+                                    onClick={() => markIndividualAsPaid(copy.id)}
+                                    className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+                                    disabled={loading}
+                                  >
+                                    Marcar Pagado
+                                  </button>
+                                ) : (
+                                  <span className="text-green-600 font-semibold text-sm">Pagado</span>
+                                )}
+                              </td>
+                            )}
                           </tr>
                         ))
                       ) : (
@@ -287,6 +293,17 @@ const displayCopies = editMode
                               <td className="border p-2 text-right font-semibold">{totalCopies}</td>
                               <td className="border p-2 text-right">-</td>
                               <td className="border p-2 text-right font-semibold">S/ {totalCost.toFixed(2)}</td>
+                              {editMode && (
+                                <td className="border p-2">
+                                  <button
+                                    onClick={() => reportType === 'weekly' ? markWeekAsPaid(period) : markMonthAsPaid(period)}
+                                    className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                                    disabled={loading}
+                                  >
+                                    Marcar {reportType === 'weekly' ? 'Semana' : 'Mes'} Pagado
+                                  </button>
+                                </td>
+                              )}
                             </tr>
                           )
                         })
@@ -301,6 +318,9 @@ const displayCopies = editMode
             )
           })
       )}
+      <div className="bg-blue-200 p-3 rounded text-right font-bold text-lg mt-6">
+        Total General: S/ {Math.round(calculateTotal(displayCopies) * 100) / 100}
+      </div>
     </div>
   )
 }
