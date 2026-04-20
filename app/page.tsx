@@ -7,8 +7,9 @@ const CopiesSection = dynamic(() => import('./components/CopiesSection'), { ssr:
 const TeachersSection = dynamic(() => import('./components/TeachersSection'), { ssr: false })
 const CopyTypesSection = dynamic(() => import('./components/CopyTypesSection'), { ssr: false })
 const ReportsSection = dynamic(() => import('./components/ReportsSection'), { ssr: false })
+const PersonalAccountsSection = dynamic(() => import('./components/PersonalAccountsSection'), { ssr: false })
 
-type Section = 'home' | 'copies' | 'teachers' | 'copy-types' | 'reports'
+type Section = 'home' | 'copies' | 'teachers' | 'copy-types' | 'reports' | 'personal-accounts'
 
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center p-8">
@@ -29,6 +30,8 @@ export default function Home() {
         return <Suspense fallback={<LoadingSpinner />}><CopyTypesSection /></Suspense>
       case 'reports':
         return <Suspense fallback={<LoadingSpinner />}><ReportsSection /></Suspense>
+      case 'personal-accounts':
+        return <Suspense fallback={<LoadingSpinner />}><PersonalAccountsSection /></Suspense>
       default:
         return (
           <div className="text-center">
@@ -58,6 +61,12 @@ export default function Home() {
                 className="bg-orange-500 hover:bg-orange-600 text-white p-6 rounded-lg font-semibold transition"
               >
                 📊 Reportes
+              </button>
+              <button
+                onClick={() => setCurrentSection('personal-accounts')}
+                className="bg-pink-500 hover:bg-pink-600 text-white p-6 rounded-lg font-semibold transition"
+              >
+                📈 Cuentas Personales
               </button>
             </div>
           </div>
