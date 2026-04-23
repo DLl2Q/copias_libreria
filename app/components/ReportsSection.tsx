@@ -27,6 +27,7 @@ export default function ReportsSection() {
   const [selectedTeacherId, setSelectedTeacherId] = useState('')
   const [editMode, setEditMode] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [selectedMonth, setSelectedMonth] = useState('') // Filtro de mes para reporte diario
 
   useEffect(() => {
     fetchTeachers()
@@ -174,9 +175,18 @@ export default function ReportsSection() {
     ? copies.filter(copy => copy.teacher_id === selectedTeacherId)
     : copies
 
+// Aplicar filtro por mes solo para reporte diario
+const dailyFilteredCopies = reportType === 'daily' && selectedMonth
+  ? filteredCopies.filter(copy => {
+      const copyDate = new Date(copy.date + 'T00:00:00')
+      const copyMonth = copyDate.toISOString().slice(0, 7) // YYYY-MM
+      return copyMonth === selectedMonth
+    })
+  : filteredCopies
+
 const displayCopies = editMode 
-    ? filteredCopies 
-    : filteredCopies.filter(copy => !copy.paid)
+    ? dailyFilteredCopies 
+    : dailyFilteredCopies.filter(copy => !copy.paid)
 
   
   const grouped = groupBy(displayCopies, getKey)
@@ -210,6 +220,35 @@ const displayCopies = editMode
             ))}
           </select>
         </div>
+        {reportType === 'daily' && (
+          <div>
+            <label className="mr-2 font-semibold">Filtrar por Mes:</label>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="border p-2 rounded"
+            >
+              <option value="">Todos los meses</option>
+              {(() => {
+                const months = new Set<string>()
+                copies.forEach(copy => {
+                  const month = copy.date.slice(0, 7) // YYYY-MM
+                  months.add(month)
+                })
+                return Array.from(months).sort().map(month => {
+                  const [year, monthNum] = month.split('-')
+                  const date = new Date(parseInt(year), parseInt(monthNum) - 1)
+                  const monthName = date.toLocaleDateString('es-PE', { month: 'long', year: 'numeric' })
+                  return (
+                    <option key={month} value={month}>
+                      {monthName.charAt(0).toUpperCase() + monthName.slice(1)}
+                    </option>
+                  )
+                })
+              })()}
+            </select>
+          </div>
+        )}
         <div>
           <button
             onClick={() => setEditMode(!editMode)}
